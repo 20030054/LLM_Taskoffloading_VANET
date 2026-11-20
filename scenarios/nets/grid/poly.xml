@@ -1,0 +1,18 @@
+<additional>
+  <poly id="b0" type="building" color="1,0,0" fill="1" layer="-1" shape="18,18 232,18 232,232 18,232"/>
+  <poly id="b1" type="building" color="1,0,0" fill="1" layer="-1" shape="18,268 232,268 232,482 18,482"/>
+  <poly id="b2" type="building" color="1,0,0" fill="1" layer="-1" shape="18,518 232,518 232,732 18,732"/>
+  <poly id="b3" type="building" color="1,0,0" fill="1" layer="-1" shape="18,768 232,768 232,982 18,982"/>
+  <poly id="b4" type="building" color="1,0,0" fill="1" layer="-1" shape="268,18 482,18 482,232 268,232"/>
+  <poly id="b5" type="building" color="1,0,0" fill="1" layer="-1" shape="268,268 482,268 482,482 268,482"/>
+  <poly id="b6" type="building" color="1,0,0" fill="1" layer="-1" shape="268,518 482,518 482,732 268,732"/>
+  <poly id="b7" type="building" color="1,0,0" fill="1" layer="-1" shape="268,768 482,768 482,982 268,982"/>
+  <poly id="b8" type="building" color="1,0,0" fill="1" layer="-1" shape="518,18 732,18 732,232 518,232"/>
+  <poly id="b9" type="building" color="1,0,0" fill="1" layer="-1" shape="518,268 732,268 732,482 518,482"/>
+  <poly id="b10" type="building" color="1,0,0" fill="1" layer="-1" shape="518,518 732,518 732,732 518,732"/>
+  <poly id="b11" type="building" color="1,0,0" fill="1" layer="-1" shape="518,768 732,768 732,982 518,982"/>
+  <poly id="b12" type="building" color="1,0,0" fill="1" layer="-1" shape="768,18 982,18 982,232 768,232"/>
+  <poly id="b13" type="building" color="1,0,0" fill="1" layer="-1" shape="768,268 982,268 982,482 768,482"/>
+  <poly id="b14" type="building" color="1,0,0" fill="1" layer="-1" shape="768,518 982,518 982,732 768,732"/>
+  <poly id="b15" type="building" color="1,0,0" fill="1" layer="-1" shape="768,768 982,768 982,982 768,982"/>
+</additional>

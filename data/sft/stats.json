@@ -1,0 +1,62 @@
+{
+ "records_used": 49183,
+ "val_seeds": [
+  [
+   "grid",
+   4
+  ]
+ ],
+ "seen_map_test_seeds": [
+  [
+   "highway",
+   2
+  ]
+ ],
+ "train": {
+  "n": 27005,
+  "kinds": {
+   "local": 12066,
+   "veh": 11230,
+   "rsu": 2947,
+   "cloud": 762
+  },
+  "maps": {
+   "highway": 5829,
+   "grid": 21176
+  }
+ },
+ "val": {
+  "n": 400,
+  "kinds": {
+   "cloud": 12,
+   "veh": 172,
+   "rsu": 74,
+   "local": 142
+  },
+  "maps": {
+   "grid": 400
+  }
+ },
+ "test": {
+  "n": 400,
+  "kinds": {
+   "veh": 101,
+   "local": 274,
+   "rsu": 18,
+   "cloud": 7
+  },
+  "maps": {
+   "spider": 400
+  }
+ },
+ "test_seen_map": {
+  "n": 400,
+  "kinds": {
+   "local": 239,
+   "veh": 161
+  },
+  "maps": {
+   "highway": 400
+  }
+ }
+}

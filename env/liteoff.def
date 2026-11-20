@@ -1,0 +1,22 @@
+# Apptainer/Singularity definition (HPC). Two options:
+#  (a) build from the Docker image:   apptainer build liteoff.sif docker-daemon://liteoff:latest
+#      or after pushing it:            apptainer build liteoff.sif docker://<registry>/liteoff:latest
+#  (b) build from this file (needs the Docker image in a registry):
+#      apptainer build liteoff.sif env/liteoff.def
+Bootstrap: docker
+From: liteoff:latest
+
+%environment
+    export OMNETPP_HOME=/opt/omnetpp VEINS_HOME=/opt/veins SUMO_HOME=/opt/sumo
+    export PATH=/opt/venv/bin:/opt/omnetpp/bin:$PATH LD_LIBRARY_PATH=/opt/omnetpp/lib
+    export OLLAMA_BIN=/opt/ollama/bin/ollama
+
+%runscript
+    exec "$@"
+
+%labels
+    Name liteoff-llm
+    OMNeT 6.1.0
+    Veins 5.3.1-patched
+    SUMO 1.25.0
+    Ollama 0.40.0

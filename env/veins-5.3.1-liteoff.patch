@@ -1,0 +1,21 @@
+--- a/src/veins/modules/mobility/traci/TraCICommandInterface.cc	2025-03-08 22:38:37.000000000 +0500
++++ b/src/veins/modules/mobility/traci/TraCICommandInterface.cc	2026-11-02 15:05:57.015744487 +0500
+@@ -39,6 +39,7 @@
+ namespace veins {
+ 
+ const std::map<uint32_t, TraCICommandInterface::VersionConfig> TraCICommandInterface::versionConfigs = {
++    {22, {22, TYPE_DOUBLE, TYPE_POLYGON, VAR_TIME}}, // SUMO 1.24+ (added for this study)
+     {21, {21, TYPE_DOUBLE, TYPE_POLYGON, VAR_TIME}}, // since SUMO 1.19.0
+     {20, {20, TYPE_DOUBLE, TYPE_POLYGON, VAR_TIME}}, // since SUMO 1.2.0
+     {19, {19, TYPE_DOUBLE, TYPE_POLYGON, VAR_TIME}}, // since SUMO 1.1.0
+--- a/src/veins/modules/mac/ieee80211p/Mac1609_4.cc	2025-03-08 22:38:37.000000000 +0500
++++ b/src/veins/modules/mac/ieee80211p/Mac1609_4.cc	2026-11-02 15:22:01.023256949 +0500
+@@ -1077,7 +1077,7 @@
+         }
+     }
+     if (!queueUnblocked) {
+-        throw cRuntimeError("Could not find WSM in EDCA queues with WSM ID received in ACK");
++        EV_WARN << "Ignoring late/duplicate ACK (frame already dequeued)" << std::endl;   // patched: do not abort
+     }
+     else {
+         waitUntilAckRXorTimeout = false;

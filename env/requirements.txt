@@ -1,0 +1,17 @@
+# Core (simulation side-car, analysis) - no torch needed at sim time
+numpy>=2.0
+pandas>=2.2
+scipy>=1.13
+matplotlib>=3.9
+PyYAML>=6.0
+requests>=2.31
+pytest>=8.0
+# LLM training / export (GPU node on HPC, CPU locally)
+torch>=2.9
+transformers>=4.46
+peft>=0.13
+accelerate>=1.0
+datasets>=3.0
+safetensors>=0.4
+sentencepiece
+huggingface_hub>=0.26

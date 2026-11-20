@@ -1,0 +1,23 @@
+# build outputs
+sim/src/out/
+sim/src/Makefile
+sim/src/*.so
+sim/src/messages/*_m.*
+sim/tests/test_core
+# environments / large artefacts
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+models/hf/
+models/merged/
+models/rl/*.tmp
+data/runs/
+data/*.db
+data/teacher/cache.db
+results/
+logs/
+*.sif
+*.db-wal
+*.db-shm
+experiments/manifest_*.jsonl

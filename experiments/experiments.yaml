@@ -1,0 +1,75 @@
+# LiteOff-LLM experiment matrix (plan sections 8-11).
+# make_manifest.py expands   experiment x sweep value x map x scheme x seed   into one row per run.
+# Profiles scale the matrix: "mini" = local L3 check, "pilot" = HPC pilot, "full" = HPC campaign.
+
+profiles:
+  mini:   {duration: 120, warmup: 30, seeds: [1, 2, 3, 4, 5], sweep_limit: 2}
+  pilot:  {duration: 600, warmup: 100, seeds: [1, 2, 3], sweep_limit: 1}
+  full:   {duration: 600, warmup: 100, seeds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]}
+
+defaults:
+  map: grid
+  vehicles: 60              # mean running vehicles (grid is 1 km^2 -> 60 veh/km^2)
+  vmax: 13.9                # m/s (50 km/h urban)
+  rsu_spacing: 500
+  task_rate: 1.0            # tasks / vehicle / s (Poisson)
+
+# map-specific defaults (applied before experiment overrides)
+maps:
+  grid:    {vmax: 13.9, rsu_spacing: 500}
+  highway: {vmax: 30.6, rsu_spacing: 1000, vehicles: 120}   # 20 veh/km/direction on 3 km
+  spider:  {vmax: 13.9, rsu_spacing: 500}
+
+# Every scheme behind the same decision interface (ini: *.world.scheme)
+schemes:
+  local:      {scheme: local}
+  rsu:        {scheme: rsu}
+  random:     {scheme: random}
+  rule:       {scheme: rule}                     # greedy rule = our fallback = "no-LLM" ablation
+  oracle:     {scheme: oracle}                   # full-information upper bound
+  liteoff:    {scheme: liteoff, params: {"*.world.deploymentMode": hybrid}}
+  b1:         {scheme: b1, params: {"*.world.rlWeights": "${RL_DIR}/b1.json"}}
+  b2:         {scheme: b2}
+  b3:         {scheme: b3}
+  b4:         {scheme: b4, params: {"*.world.rlWeights": "${RL_DIR}/b4.json"}}
+  b5:         {scheme: b5, params: {"*.world.rlWeights": "${RL_DIR}/b5.json"}}
+  # ---- ablations (section 11)
+  abl_basic_context: {scheme: liteoff, params: {"*.world.contextFamilies": basic}}
+  abl_no_distill:    {scheme: liteoff, params: {"*.world.llmModel": "${STUDENT_NODISTILL}"}}
+  abl_no_quant:      {scheme: liteoff, params: {"*.world.llmModel": "${STUDENT_F16}"}}
+  abl_no_gate:       {scheme: liteoff, params: {"*.world.gateEnabled": false}}
+  abl_no_validator:  {scheme: liteoff, params: {"*.world.validatorEnabled": false}}
+  abl_large_on_node: {scheme: liteoff, params: {"*.world.llmModel": "${TEACHER}", "*.world.ignoreLlmLatency": true, "*.world.deploymentMode": vehicle}}
+  abl_rsu_only_llm:  {scheme: liteoff, params: {"*.world.deploymentMode": rsu}}
+
+groups:
+  main: [local, rsu, random, rule, oracle, liteoff, b1, b2, b3, b4, b5]
+  ablations: [rule, liteoff, abl_basic_context, abl_no_distill, abl_no_quant, abl_no_gate, abl_no_validator, abl_large_on_node, abl_rsu_only_llm]
+
+experiments:
+  E1:   {desc: "density sweep, urban veh/km^2 (RQ5)", schemes: main, maps: [grid], sweep: {vehicles_per_unit: [20, 40, 80, 120, 160, 200]}}
+  E1H:  {desc: "density sweep, highway veh/km/direction (RQ5)", schemes: main, maps: [highway], sweep: {vehicles_per_unit: [10, 20, 40, 60]}}
+  E2:   {desc: "task arrival rate", schemes: main, maps: [grid], sweep: {task_rate: [0.5, 1, 2, 3, 5]}}
+  E3:   {desc: "vehicle speed", schemes: main, maps: [highway], sweep: {vmax: [22.2, 27.8, 33.3]}}
+  E4:   {desc: "deadline tightness", schemes: main, maps: [grid], sweep: {"**.appl.deadlineScale": [0.5, 0.75, 1.0, 1.5, 2.0]}}
+  E5:   {desc: "model size / quantisation (RQ2)", schemes: [liteoff], maps: [grid],
+         sweep: {"*.world.llmModel": ["${STUDENT_Q4}", "${STUDENT_F16}", "${BASE_Q4}", "llama3.2:1b", "${TEACHER}"]}}
+  E6:   {desc: "deployment mode (RQ3)", schemes: [liteoff], maps: [grid, highway], sweep: {"*.world.deploymentMode": [vehicle, rsu, hybrid]}}
+  E7:   {desc: "context families (RQ1)", schemes: [liteoff], maps: [grid, highway],
+         sweep: {"*.world.contextFamilies": [basic, "mobility", "mobility,link", "mobility,link,resources", "mobility,link,resources,task", "mobility,link,resources,task,trust", "mobility,link,resources,task,trust,road"]}}
+  E8:   {desc: "management overhead (RQ4)", schemes: [liteoff], maps: [grid],
+         sweep: {"*.world.modelUpdateInterval": ["0s", "120s", "60s", "30s"], "*.world.adapterBytes": [2e6, 8e6]}}
+  E9:   {desc: "robustness", schemes: main, maps: [grid],
+         sweep: {"**.appl.selfishProb": [0.0, 0.1, 0.3], "*.world.initialModelProb": [1.0, 0.5]}}
+  E10:  {desc: "generalisation (held-out map)", schemes: main, maps: [spider], sweep: {vehicles_per_unit: [40, 120]}}
+  E11:  {desc: "hardware: on-board accelerator speed-up vs measured CPU latency", schemes: [liteoff], maps: [grid],
+         sweep: {"*.world.vehicleLlmSpeedup": [1, 3, 10, 30]}}
+  ABL:  {desc: "ablations", schemes: ablations, maps: [grid, highway], sweep: {}}
+  SENS: {desc: "sensitivity", schemes: [liteoff], maps: [grid],
+         sweep: {"*.world.K": [3, 5, 8], "*.world.confThreshold": [0.3, 0.5, 0.7], "*.world.cacheTtl": ["1s", "2s", "5s"]}}
+
+# units of vehicles_per_unit: veh/km^2 (grid, spider ~1.2 km^2) or veh/km/direction (highway: x 3 km x 2)
+density_to_vehicles: {grid: 1.0, spider: 1.25, highway: 6.0}
+
+# RL baselines are trained before evaluation (sequential episodes, train map/seeds disjoint from eval seeds)
+rl_training: {schemes: [b1, b4, b5], map: grid, episodes: 30, seeds_from: 1001, duration: 300, warmup: 30}

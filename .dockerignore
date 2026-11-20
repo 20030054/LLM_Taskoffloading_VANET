@@ -1,0 +1,9 @@
+.venv
+.git
+models
+data
+results
+logs
+sim/src/out
+sim/src/*.so
+*.sif

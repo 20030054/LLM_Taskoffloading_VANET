@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PHY models: two-ray interference path loss, Nakagami fading, building shadowing (urban grid). -->
+<root>
+    <AnalogueModels>
+        <AnalogueModel type="TwoRayInterferenceModel">
+            <parameter name="DielectricConstant" type="double" value="1.02"/>
+        </AnalogueModel>
+        <AnalogueModel type="NakagamiFading">
+            <parameter name="constM" type="bool" value="true"/>
+            <parameter name="m" type="double" value="3.0"/>
+        </AnalogueModel>
+        <AnalogueModel type="SimpleObstacleShadowing" thresholding="true">
+            <obstacles>
+                <type id="building" db-per-cut="9" db-per-meter="0.4" />
+            </obstacles>
+        </AnalogueModel>
+    </AnalogueModels>
+    <Decider type="Decider80211p">
+        <parameter name="centerFrequency" type="double" value="5.890e9"/>
+    </Decider>
+</root>

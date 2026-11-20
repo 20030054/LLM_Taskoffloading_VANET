@@ -1,0 +1,7 @@
+# PROVISIONAL: measured under CPU contention; re-run profiling/profile_ollama.py on an idle node (see docs/STATUS.md)
+# LiteOff latency model, host=ali cpu=Intel(R) Core(TM) i5-8500 CPU @ 3.00GHz threads=None 2026-11-20 20:35:49
+model,a_ms,b_ms_per_in,c_ms_per_out,power_w,mem_mb,prefix_tok
+llama3.2:1b,1794.037,0.00000,0.000,15.0,1450
+qwen2.5:0.5b,390.410,0.20021,186.149,15.0,457,103
+qwen2.5:3b,0.000,0.63158,479.283,15.0,2087
+rl-mlp,0.0109,0,0,15.0,1
