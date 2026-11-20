@@ -636,6 +636,7 @@ void VehicleApp::decideRl(Pending& p, const Context& ctx)
     d.path = "rl";
     d.slot = std::stoi(rep["slot"]);
     if (d.slot < 0 || d.slot > (int) ctx.cands.size()) d.slot = 0;
+    if (rep.count("split") && ctx.task.splittable && d.slot > 0) d.split = std::clamp(std::stoi(rep["split"]), 0, 100);  // B1 split head
     chargeInference(L, "rl-mlp");
     applyAfter(p, ctx, d, L);
 }
@@ -999,7 +1000,7 @@ void VehicleApp::resolve(Pending& p, TaskStatus st)
         double r = st == TaskStatus::InTime ? 1.0 - 0.5 * e2e / p.task.tmax : (st == TaskStatus::Late ? -0.5 : -1.0);
         std::ostringstream o;
         o << "{\"op\":\"feedback\",\"scheme\":\"" << scheme_ << "\",\"vid\":" << myId << ",\"tid\":" << p.task.id << ",\"reward\":" << r
-          << ",\"mode\":\"" << rlMode_ << "\",\"t\":" << simTime().dbl() << "}";
+          << ",\"reoffloaded\":" << (p.rec.reoffloaded ? 1 : 0) << ",\"mode\":\"" << rlMode_ << "\",\"t\":" << simTime().dbl() << "}";
         world->sidecar().request(o.str());
     }
     cancelEvents(p);

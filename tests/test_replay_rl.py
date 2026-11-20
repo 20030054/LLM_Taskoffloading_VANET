@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 from liteoff_llm.backends import ReplayStore
-from liteoff_llm.rl import RLManager, featurize
+from liteoff_llm.rl import SPLITS, RLManager, featurize
 from liteoff_llm.synthetic import random_context
 
 
@@ -29,9 +29,9 @@ def test_featurize_shapes():
     assert x2.shape[0] == x.shape[0] + 3
 
 
-def _bandit(manager, n=1500):
-    """Reward 1 for the slot whose candidate is an RSU, -1 otherwise."""
-    rng = random.Random(1)
+def _bandit(manager, n=1500, seed=1):
+    """Reward 1 for the slot whose candidate is an RSU (0 if none), -1 otherwise."""
+    rng = random.Random(seed)
     hits = []
     for tid in range(n):
         ctx = random_context(rng, 4)
@@ -41,6 +41,27 @@ def _bandit(manager, n=1500):
         hits.append(rep["slot"] == best)
         manager.feedback({"tid": tid, "reward": r})
     return np.mean(hits[:200]), np.mean(hits[-300:])
+
+
+def test_b1_action_space_is_local_or_rsu_with_split():
+    m = RLManager("b1", "train", None, seed=0)
+    rng = random.Random(3)
+    for tid in range(300):
+        ctx = random_context(rng, 5)
+        rep = m.decide({"ctx": ctx, "vid": 1, "tid": tid})
+        assert rep["slot"] == 0 or ctx["cands"][rep["slot"] - 1]["kind"] == "rsu"
+        assert rep["split"] in SPLITS
+        if not ctx["task"]["split"] or rep["slot"] == 0:
+            assert rep["split"] == 0
+        m.feedback({"tid": tid, "reward": 0.0})
+
+
+def test_b1_handover_penalty():
+    m = RLManager("b1", "train", None, seed=0)
+    ctx = random_context(random.Random(4), 3)
+    m.decide({"ctx": ctx, "vid": 1, "tid": 1})
+    m.feedback({"tid": 1, "reward": 1.0, "reoffloaded": 1})
+    assert abs(m.last[1]["r"] - (1.0 - m.handover_penalty)) < 1e-9
 
 
 def test_dqn_learns(tmp_path):
@@ -54,16 +75,30 @@ def test_dqn_learns(tmp_path):
     assert ev.agent.steps > 0
 
 
-def test_actor_critic_learns(tmp_path):
-    m = RLManager("b5", "train", str(tmp_path / "b5.json"), seed=0)
-    early, late = _bandit(m, 10000)
-    assert late > early + 0.15, (early, late)
-
-
-def test_fedavg(tmp_path):
+def test_ppo_learns_b4(tmp_path):
     m = RLManager("b4", "train", str(tmp_path / "b4.json"), seed=0)
-    _bandit(m, 200)
+    early, late = _bandit(m, 6000)
+    assert late > early + 0.2, (early, late)
+
+
+def test_madsaspg_learns_b5(tmp_path):
+    m = RLManager("b5", "train", str(tmp_path / "b5.json"), seed=0)
+    early, late = _bandit(m, 8000)
+    assert late > early + 0.2, (early, late)
+    m.close()
+    ev = RLManager("b5", "eval", str(tmp_path / "b5.json"))
+    assert ev.agent.steps > 0
+    import pytest
+    with pytest.raises(ValueError):
+        RLManager("b1", "eval", str(tmp_path / "b5.json"))
+
+
+def test_fedavg_meta_step(tmp_path):
+    m = RLManager("b4", "train", str(tmp_path / "b4.json"), seed=0)
+    _bandit(m, 400)
     assert len(m.regions) == 2
+    g0 = [p.copy() for p in m.agent.params()]
     assert m.fedavg() == 2
-    p0 = [a.q.params()[0] for a in m.regions.values()]
-    assert np.allclose(p0[0], p0[1])
+    p0 = [a.params()[0] for a in m.regions.values()]
+    assert np.allclose(p0[0], p0[1]) and np.allclose(p0[0], m.agent.params()[0])
+    assert not np.allclose(g0[0], m.agent.params()[0])

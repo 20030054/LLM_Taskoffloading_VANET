@@ -6,7 +6,7 @@ Machine: Intel i5-8500 (6 cores), 18 GB RAM, no GPU · OMNeT++ 6.1 · Veins 5.3.
 | Level | Check | Result |
 |---|---|---|
 | L0 | C++ decision core (`make -C sim test`) | 69 checks, 0 failures |
-| L0 | Python (`pytest tests`) | 21 passed: encoder, C++/Python parser parity, estimator parity, replay store, DQN, actor-critic, FedAvg, side-car protocol, dataset splits (no leakage), manifest, `.sca` parsing, statistics |
+| L0 | Python (`pytest tests`) | 24 passed (including aligned B1/B4/B5 learners): encoder, C++/Python parser parity, estimator parity, replay store, DQN, actor-critic, FedAvg, side-car protocol, dataset splits (no leakage), manifest, `.sca` parsing, statistics |
 | L1 | Smoke run (grid, 40 vehicles, rule) | Completes; accounting balances (generated = in time + late + dropped) |
 | Build | sim library against Veins | OK; the Makefile auto-detects a GCC with libstdc++ headers for clang |
 | Sanity | 6 non-LLM schemes, grid, 40 vehicles, 90 s, seed 1 | TCR: oracle 0.572 > rule 0.526 > local 0.470; random worst. Identical workload across schemes (2549 tasks). |
@@ -26,8 +26,7 @@ Machine: Intel i5-8500 (6 cores), 18 GB RAM, no GPU · OMNeT++ 6.1 · Veins 5.3.
   `liteoff`, `b2` and `b3` refuse to start: the world module checks that the latency model has an entry for every model it charges.
 * **L2 functional test** (`experiments/functional_test.sh`) and **L3 mini experiment** (`experiments/mini_experiment.sh`).
   The scripts are written; the LLM parts need the exported student.
-* **RL baselines training** (`experiments/slurm_train_rl.sh`). The learning code is unit-tested (DQN and actor-critic learn a
-  contextual bandit; FedAvg works).
+* **RL baselines training** (`experiments/slurm_train_rl.sh`). The baselines were aligned with the papers (docs/BASELINES.md). B1 DQN, B4 PPO with federated meta-learning, and B5 deterministic policy gradient all pass learning tests and a train → eval simulation run.
 * **Container build** (`env/Dockerfile`, `env/liteoff.def`). Written but not yet built.
 
 ## Known findings and risks to watch
