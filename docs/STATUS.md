@@ -13,7 +13,7 @@ Machine: Intel i5-8500 (6 cores), 18 GB RAM, no GPU · OMNeT++ 6.1 · Veins 5.3.
 | Channel | Paced 2 KB chunks + SNR-based MCS | Unicast PDR fell from 23% to 6% (rule, grid) |
 | Maps | grid (buildings), highway, spider | All run; the highway and spider maps use the PHY config without shadowing |
 | Dataset | 11 `explore` runs (grid ×6, highway ×2, spider ×2) | 84,677 decision records → 49,183 that pass the gate → 27,005 balanced train / 400 val / 400 test (held-out map) / 400 test (unseen seed) |
-| Teacher | qwen2.5:3b, grammar-constrained JSON + privileged estimates | 100% parse rate, ~30–37% oracle agreement (16–25 sample probes) |
+| Teacher | qwen2.5:3b, grammar-constrained JSON + privileged estimates | 100% parse rate. Oracle agreement 46% on the first 100 of 300 labelled samples (stopped deliberately; full-scale labelling moves to HPC) |
 | LLM I/O | Ollama logprobs → confidence; prompt-cache aware token accounting | Works |
 
 ## Not finished locally ⏳ (planned for HPC, see HPC.md)
@@ -39,3 +39,8 @@ Machine: Intel i5-8500 (6 cores), 18 GB RAM, no GPU · OMNeT++ 6.1 · Veins 5.3.
 * **Simulation cost** grows super-linearly with density (grid: 40 vehicles ≈ 100 s, 70 vehicles ≈ 400 s of wall time per
   150 s simulated, with `explore`). Use `analysis/budget.py` on the pilot results to set `--time` before the full array.
   Pack small runs with `RUNS_PER_TASK`.
+
+## Hand-off (2026-11-20)
+Local development is finished, and all remaining work runs on HPC. Nothing is left running on the development machine.
+Once the HPC results are back (`results/full/analysis/*.csv`, `results/full/figures/`), the next step is writing the
+paper. Plan §13 lists the target venues, and the claims must be stated as simulation results with a measured latency model.
