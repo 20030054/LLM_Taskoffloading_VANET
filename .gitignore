@@ -21,3 +21,7 @@ logs/
 *.db-wal
 *.db-shm
 experiments/manifest_*.jsonl
+# generated data (rebuild with experiments/gen_dataset.sh + llm/pipeline.sh dataset)
+data/*
+!data/sft_local_v1.tar.gz
+!data/README.md
